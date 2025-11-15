@@ -4,7 +4,7 @@
 
 ![Картика с латте](https://www.torrefacto.ru/upload/uf/d00/mdoibknztzibkoforsrbpa93ijzbhw9f.jpg)
 
-Программа определяет сепень обжарки кофе при помощи сверточной нейронной сети (CNN). 
+Программа определяет степень обжарки кофе при помощи сверточной нейронной сети (CNN). 
 Обучена на [датасете](https://www.kaggle.com/datasets/sot2542/coffee-bean-dataset-v1/data) с kaggle. Определяет 4 степени обжарки: зеленые зерна,
 светлая, средняя и темная обжарка. 
 
@@ -21,7 +21,7 @@
 
 ## Установка 
 
-http://192.168.1.140:8501
+https://beansai-xkcy2wkyll9kzfvowabymt.streamlit.app/stats
 
 ## Руководство пользователя
 
