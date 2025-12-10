@@ -21,7 +21,7 @@
 
 ## Установка 
 
-https://beansai-xkcy2wkyll9kzfvowabymt.streamlit.app/stats
+Будет добавлено позже
 
 ## Руководство пользователя
 
