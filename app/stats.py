@@ -14,7 +14,7 @@ if st.button("Очистить данные", use_container_width=True):
         cursor.execute(query)
 
 connection = get_connection()
-query = "SELECT * FROM statistics"
+query = "SELECT * FROM statistics ORDER BY time"
 
 with DataBaseConnection(connection) as cursor:
     cursor.execute(query)

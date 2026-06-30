@@ -6,7 +6,8 @@ import torch.nn as nn
 import torchvision.transforms.v2
 
 def prediction_sample(image):
-    params = torch.load("app/models/coffee_model_best.pth", map_location="cpu")
+    # при развертывании с supabase app/models/coffee_model_best.pth
+    params = torch.load("models/coffee_model_upgraded.pth", map_location="cpu")
     classes = params['classes']
 
     new_model = CoffeeCNN()
@@ -14,7 +15,8 @@ def prediction_sample(image):
 
     T = torchvision.transforms.Compose([torchvision.transforms.Resize((224, 224)), 
                                         torchvision.transforms.v2.RGB(),
-                                        torchvision.transforms.ToTensor()])
+                                        torchvision.transforms.ToTensor(),
+                                        torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
     image = T(image)
 
@@ -38,13 +40,11 @@ class CoffeeCNN(nn.Module):
     self.conv3 = nn.Conv2d(128, 256, (3, 3), padding=1)
     self.pool3 = nn.MaxPool2d(2)
 
-    self.conv4 = nn.Conv2d(256, 512, (3, 3), padding=1)
-    self.pool4 = nn.MaxPool2d(2)
     self.adapool = nn.AdaptiveAvgPool2d((6, 6))
 
     self.flat = nn.Flatten()
-    self.drop = nn.Dropout(0.5)
-    self.lin1 = nn.Linear(512 * 6 * 6, 512)
+    self.drop = nn.Dropout(0.4)
+    self.lin1 = nn.Linear(256 * 6 * 6, 512)
     self.lin2 = nn.Linear(512, 128)
     self.lin3 = nn.Linear(128, 4)
 
@@ -53,7 +53,6 @@ class CoffeeCNN(nn.Module):
     x = self.pool1(self.act(self.conv1(x)))
     x = self.pool2(self.act(self.conv2(x)))
     x = self.pool3(self.act(self.conv3(x)))
-    x = self.pool4(self.act(self.conv4(x)))
     x = self.adapool(x)
     x = self.flat(x)
     x = self.drop(self.act(self.lin1(x)))
@@ -80,11 +79,23 @@ class DataBaseConnection:
 
 def get_connection():
   connection = psycopg2.connect(
-  user=st.secrets.get("USER", "postgres.qnlezixijjjpapvldanz"),
+  user=st.secrets["USER"],
   password=st.secrets["PASSWORD"],
-  host=st.secrets.get("HOST", "aws-1-eu-west-1.pooler.supabase.com"),
-  port=st.secrets.get("PORT", "5432"),
-  database=st.secrets.get("DATABASE", "postgres"),
-  sslmode="require"
+  host=st.secrets["HOST"],
+  port=st.secrets["PORT"],
+  database=st.secrets["DATABASE"]
   )
   return connection
+
+def init_db():
+    connection = get_connection()
+    with DataBaseConnection(connection) as cursor:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS statistics (
+                time TIMESTAMP, 
+                path VARCHAR(100), 
+                class VARCHAR(20), 
+                prob NUMERIC(5, 2), 
+                feedback VARCHAR(100)
+            );
+        """)
